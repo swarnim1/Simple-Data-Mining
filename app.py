@@ -20,5 +20,9 @@ if uploaded_file is not None:
         eda.display_basic_info(data)
     with st.expander("Summary statistics"):
         eda.display_summary_statistics(data)
+    with st.expander("Correlation Matrix"):
+        eda.display_correlation_matrix(data)
     with st.expander("Outlier Detection"):
         eda.display_outlier_detection(data)
+    with st.expander("Pairplot"):
+        eda.display_pairplot(data)
