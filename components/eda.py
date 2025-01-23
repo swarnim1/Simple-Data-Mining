@@ -63,15 +63,28 @@ def display_correlation_matrix(data):
 # Display pairplot
 def display_pairplot(data):
     st.header("Pairplot")
-    numerical_columns = data.select_dtypes(include=['number']).columns
+    
+    # Select numerical columns
+    numerical_columns = list(data.select_dtypes(include=['number']).columns)  # Ensure it's a Python list
+    
+    # Check if there are at least two numerical columns
     if len(numerical_columns) > 1:
-        selected_columns = st.multiselect("Select columns for pairplot", numerical_columns, default=numerical_columns[:2])
+        # Multiselect widget for column selection
+        selected_columns = st.multiselect(
+            "Select columns for pairplot",
+            numerical_columns,
+            default=numerical_columns[:2]  # Default to the first two numerical columns
+        )
+        
+        # Check if user has selected columns
         if selected_columns:
+            # Create pairplot
             fig = sns.pairplot(data[selected_columns])
             st.pyplot(fig)
         else:
-            st.write("Not enough numerical columns for pairplot.")
-
+            st.warning("Please select at least one numerical column for the pairplot.")
+    else:
+        st.warning("Not enough numerical columns in the dataset to create a pairplot.")
 
 # Display outlier detection
 def display_outlier_detection(data):
