@@ -6,17 +6,18 @@ import matplotlib.pyplot as plt
 def display_basic_info(data):
     
     # Dataset Shape
+    st.header("Basic Information")
     st.write(f"**Shape of the dataset:** {data.shape[0]} rows, {data.shape[1]} columns")
 
     # Column names and Data Types
     st.write("**Column names and Data Types:**")
-    dtypes_df = pd.DataFrame(data.dtypes).T  # Convert to DataFrame and Transpose
+    dtypes_df = pd.DataFrame(data.dtypes).transpose()  # Convert to DataFrame and Transpose
     dtypes_df.index = ['dtype']  # Rename the index for clarity
 
     st.write( dtypes_df)
 
     # Missing Values
-    missing_values = pd.DataFrame(data.isnull().sum()).T
+    missing_values = pd.DataFrame(data.isnull().sum()).transpose()
     missing_values.index = ['Missing Values']
     st.write("**Missing Values Per Column:**")
     st.write(missing_values[missing_values > 0])
@@ -47,14 +48,42 @@ def display_summary_statistics(data):
     else:
         st.write("No categorical columns found.")
 
-def display_outlier_detection(data):
+# Display correlation matrix
+def display_correlation_matrix(data):
+    st.header("Correlation Matrix")
+    numerical_columns = data.select_dtypes(include=['number'])
+    if not numerical_columns.empty:
+        corr_matrix = numerical_columns.corr()
+        fig, ax = plt.subplots()
+        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
+    else:
+        st.write("No numerical columns for correlation matrix.")
 
+# Display pairplot
+def display_pairplot(data):
+    st.header("Pairplot")
+    numerical_columns = data.select_dtypes(include=['number']).columns
+    if len(numerical_columns) > 1:
+        selected_columns = st.multiselect("Select columns for pairplot", numerical_columns, default=numerical_columns[:2])
+        if selected_columns:
+            fig = sns.pairplot(data[selected_columns])
+            st.pyplot(fig)
+        else:
+            st.write("Not enough numerical columns for pairplot.")
+
+
+# Display outlier detection
+def display_outlier_detection(data):
+    st.header("Outlier Detection")
     # Identify numerical columns
     numerical_columns = data.select_dtypes(include=['number']).columns
-
-    selected_columns = st.multiselect("Select columns for outlier detection", data.select_dtypes(include=['number']).columns)
-    for col in selected_columns:
-        st.write(f"Boxplot for `{col}`:")
-        fig, ax = plt.subplots()
-        sns.boxplot(x=data[col], ax=ax)
-        st.pyplot(fig)
+    if len(numerical_columns) > 0:
+        selected_columns = st.multiselect("Select columns for outlier detection", data.select_dtypes(include=['number']).columns)
+        for col in selected_columns:
+            st.write(f"Boxplot for `{col}`:")
+            fig, ax = plt.subplots()
+            sns.boxplot(x=data[col], ax=ax)
+            st.pyplot(fig)
+    else:
+            st.write("No numerical columns for outlier detection.")
