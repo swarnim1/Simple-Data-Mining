@@ -1,6 +1,7 @@
 import streamlit as st
 from components import eda, feature_engineering
 import pandas as pd
+import numpy as np
 
 # Set up the Streamlit app
 st.set_page_config(page_title="SIMPLE DATA MINING", layout="wide")
