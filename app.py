@@ -43,7 +43,7 @@ elif uploaded_file is not None:
                 ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],
                 index=0,
             )
-            eda.outlier_detection(data, outlier_technique)  # Pass selected technique to the function
+            eda.outlier_detection(data, detection_method)  # Pass selected technique to the function
         elif visualization_type == "Heatmap":
             st.subheader("Heatmap Settings")
             correlation_method = st.selectbox("Select Correlation Method", ["pearson", "spearman", "kendall"], index=0,)
