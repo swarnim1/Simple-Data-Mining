@@ -98,7 +98,7 @@ else:
                 max_value=len(data.columns) - 1,
                 value=5
             )
-            preprocessing.wrapper_based_rfe(data, target_column, num_features)
+            preprocessing.wrapper_based_methods(data, target_column, num_features)
         
         elif feature_eng_method == "Feature Extraction: PCA":
             st.subheader("Feature Extraction: PCA")
@@ -108,7 +108,7 @@ else:
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
-            preprocessing.feature_extraction_pca(data, n_components)
+            preprocessing.feature_extraction_methods(data, n_components)
         
         else:
             st.text("Select a feature engineering technique")
