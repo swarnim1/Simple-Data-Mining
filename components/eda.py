@@ -267,7 +267,7 @@ def display_histogram(data):
 
 
 
-def outlier_detection(data):
+def outlier_detection(data, detection_method):
     st.header("Outlier Detection")
     
     # Select numerical columns
@@ -278,12 +278,6 @@ def outlier_detection(data):
     if numerical_columns:
         # Dropdown for selecting the column
         selected_column = st.selectbox("Select numerical column for outlier detection", numerical_columns)
-        
-        # Select outlier detection technique
-        detection_method = st.selectbox(
-            "Select Outlier Detection Technique",
-            ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"]
-        )
         
         if detection_method == "Outlier Detection: Box Plot":
             # Additional customization options
@@ -354,7 +348,6 @@ def outlier_detection(data):
         
         elif detection_method == "Outlier Detection: Isolation Forest":
             st.subheader("Isolation Forest Outlier Detection")
-            from sklearn.ensemble import IsolationForest
             
             contamination = st.slider("Contamination (Proportion of Outliers)", min_value=0.01, max_value=0.5, value=0.1)
             model = IsolationForest(contamination=contamination, random_state=42)
@@ -365,6 +358,7 @@ def outlier_detection(data):
             st.dataframe(outliers)
     else:
         st.warning("No numerical columns in the dataset for outlier detection.")
+
 
 def display_heatmap(data, correlation_method="pearson"):
     """
