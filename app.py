@@ -38,7 +38,14 @@ elif uploaded_file is not None:
         elif visualization_type == "Box Plot":
             eda.display_boxplot(data)
         elif visualization_type == "Heatmap":
-            eda.display_heatmap(data)
+            # Heatmap customization options
+            st.subheader("Heatmap Settings")
+            correlation_method = st.selectbox(
+                "Select Correlation Method",
+                ["pearson", "spearman", "kendall"],
+                index=0,
+            )
+            eda.display_heatmap(data, correlation_method)  # Pass correlation method to the heatmap function
         elif visualization_type == "Bar Plot":
             eda.display_barplot(data)
         elif visualization_type == "Line Plot":
