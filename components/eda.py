@@ -282,10 +282,10 @@ def outlier_detection(data):
         # Select outlier detection technique
         detection_method = st.selectbox(
             "Select Outlier Detection Technique",
-            ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"]
+            ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"]
         )
         
-        if detection_method == "Box Plot":
+        if detection_method == "Outlier Detection: Box Plot":
             # Additional customization options
             with st.sidebar:
                 st.subheader("Box Plot Customization")
@@ -315,7 +315,7 @@ def outlier_detection(data):
                         ax=ax
                     )
                 
-                ax.set_title(f"Box Plot: {selected_column}" + (f" by {group_by}" if group_by else ""))
+                ax.set_title(f"Outlier Detection: Box Plot - {selected_column}" + (f" by {group_by}" if group_by else ""))
                 st.pyplot(fig)
                 
                 # Add download button for the plot
@@ -325,13 +325,13 @@ def outlier_detection(data):
                 st.download_button(
                     label="Download Box Plot as PNG",
                     data=buffer,
-                    file_name=f"boxplot_{selected_column}.png",
+                    file_name=f"outlier_detection_boxplot_{selected_column}.png",
                     mime="image/png"
                 )
             except Exception as e:
                 st.error(f"Error creating box plot: {e}")
         
-        elif detection_method == "Z-Score":
+        elif detection_method == "Outlier Detection: Z-Score":
             st.subheader("Z-Score Outlier Detection")
             threshold = st.slider("Select Z-Score Threshold", min_value=1.0, max_value=5.0, value=3.0)
             z_scores = (data[selected_column] - data[selected_column].mean()) / data[selected_column].std()
@@ -340,7 +340,7 @@ def outlier_detection(data):
             st.write(f"Number of outliers detected: {len(outliers)}")
             st.dataframe(outliers)
         
-        elif detection_method == "IQR Method":
+        elif detection_method == "Outlier Detection: IQR Method":
             st.subheader("IQR Method Outlier Detection")
             q1 = data[selected_column].quantile(0.25)
             q3 = data[selected_column].quantile(0.75)
@@ -352,7 +352,7 @@ def outlier_detection(data):
             st.write(f"Number of outliers detected: {len(outliers)}")
             st.dataframe(outliers)
         
-        elif detection_method == "Isolation Forest":
+        elif detection_method == "Outlier Detection: Isolation Forest":
             st.subheader("Isolation Forest Outlier Detection")
             from sklearn.ensemble import IsolationForest
             
@@ -365,7 +365,6 @@ def outlier_detection(data):
             st.dataframe(outliers)
     else:
         st.warning("No numerical columns in the dataset for outlier detection.")
-
 
 def display_heatmap(data, correlation_method="pearson"):
     """
