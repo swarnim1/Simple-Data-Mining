@@ -46,7 +46,7 @@ elif uploaded_file is not None:
                 index=0,
             )
             eda.display_heatmap(data, correlation_method)  # Pass correlation method to the heatmap function
-ization_type == "Bar Plot":
+        elif visualization_type == "Bar Plot":
             eda.display_barplot(data)
         elif visualization_type == "Line Plot":
             eda.display_lineplot(data)
