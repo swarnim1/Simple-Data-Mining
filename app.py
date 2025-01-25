@@ -25,7 +25,7 @@ elif uploaded_file is not None:
     with st.expander("Visualizations"):
         visualization_type = st.selectbox(
             "Select Visualization Type",
-            [None,"Pairplot", "Scatter Plot", "Histogram", "Box Plot","Heatmap" , "Bar Plot","Line Plot","Violin Plot","Time-Series Plot"]
+            [None,"Pairplot", "Scatter Plot", "Histogram" ,"Heatmap" , "Bar Plot","Line Plot","Violin Plot","Time-Series Plot"]
         )
         if visualization_type == None:
             st.text("Choose a plot")
