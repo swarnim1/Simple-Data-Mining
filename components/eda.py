@@ -327,27 +327,16 @@ def display_boxplot(data):
         st.warning("No numerical columns in the dataset to create a box plot.")
 
 
-
-def display_heatmap(data):
+def display_heatmap(data, correlation_method="pearson"):
     st.header("Heatmap")
     
     # Select numerical columns
     numerical_columns = list(data.select_dtypes(include=['number']).columns)
     
-    # Check if there are numerical columns
     if len(numerical_columns) > 1:
         # Sidebar for customization options
         with st.sidebar:
             st.subheader("Heatmap Customization")
-            
-            # Select correlation method
-            correlation_method = st.selectbox(
-                "Correlation Method",
-                ["pearson (linear)", "kendall (rank)", "spearman (rank)"],
-                index=0
-            )
-            
-            # Additional options
             annot = st.checkbox("Show Annotations", value=True)
             fmt = st.selectbox("Annotation Format", ["0.2f", "0.1f", "d"], index=0)
             cmap = st.selectbox(
@@ -358,16 +347,8 @@ def display_heatmap(data):
             linewidths = st.slider("Line Widths Between Cells", min_value=0.0, max_value=2.0, value=0.5)
             cbar = st.checkbox("Show Color Bar", value=True)
         
-        # Map selected method to valid options
-        method_mapping = {
-            "pearson (linear)": "pearson",
-            "kendall (rank)": "kendall",
-            "spearman (rank)": "spearman"
-        }
-        selected_method = method_mapping[correlation_method]
-        
-        # Calculate correlation matrix
-        corr_matrix = data[numerical_columns].corr(method=selected_method)
+        # Calculate correlation matrix using the selected method
+        corr_matrix = data[numerical_columns].corr(method=correlation_method)
         
         # Create heatmap
         try:
@@ -381,7 +362,7 @@ def display_heatmap(data):
                 cbar=cbar,
                 ax=ax
             )
-            ax.set_title(f"Heatmap ({correlation_method.split(' ')[0]} Correlation)")
+            ax.set_title(f"Heatmap ({correlation_method.capitalize()} Correlation)")
             st.pyplot(fig)
             
             # Add download button for the plot
@@ -398,7 +379,6 @@ def display_heatmap(data):
             st.error(f"Error creating heatmap: {e}")
     else:
         st.warning("Not enough numerical columns in the dataset to create a heatmap.")
-
 
 def display_barplot(data):
     st.header("Bar Plot")
