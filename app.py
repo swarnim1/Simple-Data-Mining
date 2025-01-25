@@ -41,20 +41,15 @@ elif uploaded_file is not None:
             outlier_technique = st.selectbox( "Select Outlier Detection Technique", ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"], index=0,)
             eda.outlier_detection(data, outlier_technique)  # Pass selected technique to the function
 
-        elif visualization_type == "Heatmap":
-            # Heatmap customization options
+       elif visualization_type == "Heatmap":
             st.subheader("Heatmap Settings")
-            correlation_method = st.selectbox(
-                "Select Correlation Method",
-                ["pearson", "spearman", "kendall"],
-                index=0,
-            )
-            eda.display_heatmap(data, correlation_method)  # Pass correlation method to the heatmap function
-        elif visualization_type == "Bar Plot":
+            correlation_method = st.selectbox("Select Correlation Method", ["pearson", "spearman", "kendall"], index=0,)
+            eda.display_heatmap(data, correlation_method)
+       elif visualization_type == "Bar Plot":
             eda.display_barplot(data)
-        elif visualization_type == "Line Plot":
+       elif visualization_type == "Line Plot":
             eda.display_lineplot(data)
-        elif visualization_type == "Violin Plot":
+       elif visualization_type == "Violin Plot":
             eda.display_violinplot(data)
-        elif visualization_type == "Time-Series Plot":
+       elif visualization_type == "Time-Series Plot":
             eda.display_timeseries_plot(data)
