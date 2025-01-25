@@ -69,12 +69,8 @@ else:
             "Select Feature Engineering Technique",
             [
                 "Filter-Based Techniques: Correlation",
-                "Filter-Based Techniques: Chi-Square",
-                "Filter-Based Techniques: ANOVA",
-                "Filter-Based Techniques: Mutual Information",
                 "Wrapper-Based Techniques: Recursive Feature Elimination",
-                "Feature Extraction: PCA",
-                "Feature Extraction: LDA"
+                "Feature Extraction: PCA"
             ],
             index=0
         )
@@ -88,31 +84,9 @@ else:
                 value=0.5,
                 step=0.01
             )
-            preprocessing.filter_based_methods(data, threshold)
-        
-        elif feature_eng_method == "Filter-Based Techniques: Chi-Square":
-            st.subheader("Filter-Based Techniques: Chi-Square")
-            target_column = st.selectbox(
-                "Select Target Column",
-                data.select_dtypes(include=["number"]).columns
-            )
-            preprocessing.filter_based_methods(data, target_column)
-        
-        elif feature_eng_method == "Filter-Based Techniques: ANOVA":
-            st.subheader("Filter-Based Techniques: ANOVA")
-            target_column = st.selectbox(
-                "Select Target Column",
-                data.select_dtypes(include=["number"]).columns
-            )
-            preprocessing.filter_based_methods(data, target_column)
-        
-        elif feature_eng_method == "Filter-Based Techniques: Mutual Information":
-            st.subheader("Filter-Based Techniques: Mutual Information")
-            target_column = st.selectbox(
-                "Select Target Column",
-                data.select_dtypes(include=["number"]).columns
-            )
-            preprocessing.filter_based_methods(data, target_column)
+            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
+            # Pass target_column along with data and threshold
+            preprocessing.filter_based_methods(data, target_column, threshold)
         
         elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
             st.subheader("Wrapper-Based Techniques: Recursive Feature Elimination")
@@ -120,7 +94,13 @@ else:
                 "Select Target Column",
                 data.select_dtypes(include=["number"]).columns
             )
-            preprocessing.wrapper_based_methods(data, target_column)
+            num_features = st.slider(
+                "Number of Features to Select",
+                min_value=1,
+                max_value=len(data.columns) - 1,
+                value=5
+            )
+            preprocessing.wrapper_based_methods(data, target_column, num_features)
         
         elif feature_eng_method == "Feature Extraction: PCA":
             st.subheader("Feature Extraction: PCA")
@@ -130,11 +110,7 @@ else:
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
-            preprocessing.feature_extraction_methods(data, target_column)
-        
-        elif feature_eng_method == "Feature Extraction: LDA":
-            st.subheader("Feature Extraction: LDA")
-            preprocessing.feature_extraction_methods(data, target_column)
+            preprocessing.feature_extraction_methods(data, n_components)
         
         else:
             st.text("Select a feature engineering technique")
