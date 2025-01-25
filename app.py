@@ -35,21 +35,10 @@ elif uploaded_file is not None:
             eda.display_scatterplot(data)
         elif visualization_type == "Histogram":
             eda.display_histogram(data)
-        elif visualization_type == "outlier_detection":
-            # Outlier detection customization options
-            st.subheader("Outlier Detection Techniques")
-            outlier_technique = st.selectbox( "Select Outlier Detection Technique", ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"], index=0)
-            eda.outlier_detection(data, detection_method)  # Pass selected technique to the function
-
         elif visualization_type == "Heatmap":
-            # Heatmap customization options
             st.subheader("Heatmap Settings")
-            correlation_method = st.selectbox(
-                "Select Correlation Method",
-                ["pearson", "spearman", "kendall"],
-                index=0,
-            )
-            eda.display_heatmap(data, correlation_method)  # Pass correlation method to the heatmap function
+            correlation_method = st.selectbox("Select Correlation Method", ["pearson", "spearman", "kendall"], index=0,)
+            eda.display_heatmap(data, correlation_method)
         elif visualization_type == "Bar Plot":
             eda.display_barplot(data)
         elif visualization_type == "Line Plot":
@@ -58,3 +47,10 @@ elif uploaded_file is not None:
             eda.display_violinplot(data)
         elif visualization_type == "Time-Series Plot":
             eda.display_timeseries_plot(data)
+
+    with st.expander("Outlier Detection"):
+        st.subheader("Outlier Detection Techniques")
+        # Get the selected method from the dropdown
+        detection_method = st.selectbox("Select Outlier Detection Technique", ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],index=0)
+        # Call the outlier detection function with the selected method
+        eda.outlier_detection(data, detection_method)
