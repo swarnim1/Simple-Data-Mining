@@ -14,25 +14,35 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 # Filter-based feature selection
-def filter_based_correlation(data, threshold):
-    st.header("Filter-Based Feature Selection: Correlation")
+def filter_based_methods(data, target_column):
+    st.header("Filter-Based Feature Selection")
     
-    # Select only numeric columns
-    numeric_data = data.select_dtypes(include=[float, int])
+    # Choose technique
+    technique = st.selectbox("Select Filter-Based Technique", ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"])
     
-    if numeric_data.empty:
-        st.write("No numeric columns found.")
-        return
-
-    # Compute correlation matrix
-    correlation_matrix = numeric_data.corr()
-
-    # Filter the correlation matrix based on the threshold
-    high_correlation = correlation_matrix[correlation_matrix > threshold]
+    # Select target column and numeric features
+    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
+    selected_features = [col for col in numeric_columns if col != target_column]
+    target = data[target_column]
     
-    # Display the filtered correlation matrix
-    st.write(f"Filtered Correlation Matrix (Threshold: {threshold}):")
-    st.write(high_correlation)
+    if technique == "Correlation":
+        correlation = data[selected_features].corrwith(target)
+        st.write("Correlation with Target Variable:")
+        st.write(correlation)
+    elif technique == "Chi-Square":
+        selector = SelectKBest(score_func=chi2, k="all")
+        selector.fit(data[selected_features], target)
+        st.write("Chi-Square Scores:")
+        st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
+    elif technique == "ANOVA":
+        selector = SelectKBest(score_func=f_classif, k="all")
+        selector.fit(data[selected_features], target)
+        st.write("ANOVA F-Scores:")
+        st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
+    elif technique == "Mutual Information":
+        scores = mutual_info_classif(data[selected_features], target)
+        st.write("Mutual Information Scores:")
+        st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
 
 
 # Wrapper-based feature selection
@@ -80,34 +90,3 @@ def feature_extraction_methods(data, target_column):
         lda_transformed = lda.fit_transform(data[selected_features], target)
         st.write("LDA Transformed Data:")
         st.write(pd.DataFrame(lda_transformed, columns=["LDA1"]))
-
-
-def filter_based_methods(data, target_column):
-    st.header("Filter-Based Feature Selection")
-    
-    # Choose technique
-    technique = st.selectbox("Select Filter-Based Technique", ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"])
-    
-    # Select target column and numeric features
-    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-    selected_features = [col for col in numeric_columns if col != target_column]
-    target = data[target_column]
-    
-    if technique == "Correlation":
-        correlation = data[selected_features].corrwith(target)
-        st.write("Correlation with Target Variable:")
-        st.write(correlation)
-    elif technique == "Chi-Square":
-        selector = SelectKBest(score_func=chi2, k="all")
-        selector.fit(data[selected_features], target)
-        st.write("Chi-Square Scores:")
-        st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
-    elif technique == "ANOVA":
-        selector = SelectKBest(score_func=f_classif, k="all")
-        selector.fit(data[selected_features], target)
-        st.write("ANOVA F-Scores:")
-        st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
-    elif technique == "Mutual Information":
-        scores = mutual_info_classif(data[selected_features], target)
-        st.write("Mutual Information Scores:")
-        st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
