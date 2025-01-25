@@ -48,13 +48,9 @@ elif uploaded_file is not None:
         elif visualization_type == "Time-Series Plot":
             eda.display_timeseries_plot(data)
 
-   with st.expander("Outlier Detection"):
+    with st.expander("Outlier Detection"):
         st.subheader("Outlier Detection Techniques")
         # Get the selected method from the dropdown
-        detection_method = st.selectbox(
-            "Select Outlier Detection Technique",
-            ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],
-            index=0
-        )
+        detection_method = st.selectbox("Select Outlier Detection Technique", ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],index=0)
         # Call the outlier detection function with the selected method
         eda.outlier_detection(data, detection_method)
