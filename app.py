@@ -70,7 +70,8 @@ else:
             [
                 "Filter-Based Techniques: Correlation",
                 "Wrapper-Based Techniques: Recursive Feature Elimination",
-                "Feature Extraction: PCA"
+                "Feature Extraction: PCA",
+                "Feature Extraction: LDA"
             ],
             index=0
         )
@@ -100,6 +101,7 @@ else:
                 max_value=len(data.columns) - 1,
                 value=5
             )
+            # Pass target_column and num_features along with data
             preprocessing.wrapper_based_methods(data, target_column, num_features)
         
         elif feature_eng_method == "Feature Extraction: PCA":
@@ -111,6 +113,18 @@ else:
                 value=2
             )
             preprocessing.feature_extraction_methods(data, n_components)
+        
+        elif feature_eng_method == "Feature Extraction: LDA":
+            st.subheader("Feature Extraction: LDA")
+            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
+            n_components = st.slider(
+                "Number of Components",
+                min_value=1,
+                max_value=min(len(data.columns), len(data)),
+                value=2
+            )
+            # Pass target_column and n_components along with data for LDA
+            preprocessing.feature_extraction_methods_lda(data, target_column, n_components)
         
         else:
             st.text("Select a feature engineering technique")
