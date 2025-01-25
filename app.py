@@ -1,5 +1,5 @@
 import streamlit as st
-from components import eda
+from components import eda,modeling
 import pandas as pd
 
 # Set up the Streamlit app
@@ -25,7 +25,7 @@ elif uploaded_file is not None:
     with st.expander("Visualizations"):
         visualization_type = st.selectbox(
             "Select Visualization Type",
-            [None,"Pairplot", "Scatter Plot", "Histogram" ,"Heatmap" , "Bar Plot","Line Plot","Violin Plot","Time-Series Plot"]
+            [None,"Pairplot", "Scatter Plot", "Histogram", "Box Plot","Heatmap" , "Bar Plot","Line Plot","Violin Plot","Time-Series Plot"]
         )
         if visualization_type == None:
             st.text("Choose a plot")
@@ -35,10 +35,10 @@ elif uploaded_file is not None:
             eda.display_scatterplot(data)
         elif visualization_type == "Histogram":
             eda.display_histogram(data)
+        elif visualization_type == "Box Plot":
+            eda.display_boxplot(data)
         elif visualization_type == "Heatmap":
-            st.subheader("Heatmap Settings")
-            correlation_method = st.selectbox("Select Correlation Method", ["pearson", "spearman", "kendall"], index=0,)
-            eda.display_heatmap(data, correlation_method)
+            eda.display_heatmap(data)
         elif visualization_type == "Bar Plot":
             eda.display_barplot(data)
         elif visualization_type == "Line Plot":
@@ -47,10 +47,5 @@ elif uploaded_file is not None:
             eda.display_violinplot(data)
         elif visualization_type == "Time-Series Plot":
             eda.display_timeseries_plot(data)
-
-    with st.expander("Outlier Detection"):
-        st.subheader("Outlier Detection Techniques")
-        # Get the selected method from the dropdown
-        detection_method = st.selectbox("Select Outlier Detection Technique", ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],index=0)
-        # Call the outlier detection function with the selected method
-        eda.outlier_detection(data, detection_method)
+    with st.expander("Model Training"):
+            modeling.train_model(data)
