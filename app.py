@@ -38,8 +38,8 @@ elif uploaded_file is not None:
         elif visualization_type == "outlier_detection":
             # Outlier detection customization options
             st.subheader("Outlier Detection Techniques")
-            outlier_technique = st.selectbox( "Select Outlier Detection Technique", ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"], index=0,)
-            eda.outlier_detection(data, outlier_technique)  # Pass selected technique to the function
+            outlier_technique = st.selectbox( "Select Outlier Detection Technique", ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"], index=0)
+            eda.outlier_detection(data, detection_method)  # Pass selected technique to the function
 
         elif visualization_type == "Heatmap":
             # Heatmap customization options
