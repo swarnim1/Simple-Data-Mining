@@ -14,7 +14,74 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 # Filter-based feature selection
-def filter_based_methods(data, target_column):
+def filter_based_correlation(data, threshold):
+    st.header("Filter-Based Feature Selection: Correlation")
+    
+    # Select only numeric columns
+    numeric_data = data.select_dtypes(include=[float, int])
+    
+    if numeric_data.empty:
+        st.write("No numeric columns found.")
+        return
+
+    # Compute correlation matrix
+    correlation_matrix = numeric_data.corr()
+
+    # Filter the correlation matrix based on the threshold
+    high_correlation = correlation_matrix[correlation_matrix > threshold]
+    
+    # Display the filtered correlation matrix
+    st.write(f"Filtered Correlation Matrix (Threshold: {threshold}):")
+    st.write(high_correlation)
+
+
+# Wrapper-based feature selection
+def wrapper_based_methods(data, target_column, num_features):
+    st.header("Wrapper-Based Feature Selection")
+    
+    # Choose wrapper method
+    method = st.selectbox("Select Wrapper-Based Technique", ["RFE", "Forward Selection"])
+    
+    # Select target column and numeric features
+    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
+    selected_features = [col for col in numeric_columns if col != target_column]
+    target = data[target_column]
+    
+    if method == "RFE":
+        model = RandomForestClassifier()
+        selector = RFE(estimator=model, n_features_to_select=num_features, step=1)
+        selector.fit(data[selected_features], target)
+        st.write("Selected Features:")
+        st.write([feature for feature, selected in zip(selected_features, selector.support_) if selected])
+    elif method == "Forward Selection":
+        st.write("Forward Selection is under development")
+
+
+# Feature extraction methods
+def feature_extraction_methods(data, n_components):
+    st.header("Feature Extraction")
+    
+    # Choose extraction method
+    method = st.selectbox("Select Feature Extraction Technique", ["PCA", "LDA"])
+    
+    # Select target column and numeric features
+    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
+    selected_features = numeric_columns
+    target = data[target_column]
+    
+    if method == "PCA":
+        pca = PCA(n_components=n_components)
+        principal_components = pca.fit_transform(data[selected_features])
+        st.write("Explained Variance Ratio:")
+        st.write(pca.explained_variance_ratio_)
+    elif method == "LDA":
+        lda = LDA(n_components=1)
+        lda_transformed = lda.fit_transform(data[selected_features], target)
+        st.write("LDA Transformed Data:")
+        st.write(pd.DataFrame(lda_transformed, columns=["LDA1"]))
+
+
+def filter_based_methods(data, target_column, threshold):
     st.header("Filter-Based Feature Selection")
     
     # Choose technique
@@ -43,50 +110,3 @@ def filter_based_methods(data, target_column):
         scores = mutual_info_classif(data[selected_features], target)
         st.write("Mutual Information Scores:")
         st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
-
-
-# Wrapper-based feature selection
-def wrapper_based_methods(data, target_column):
-    st.header("Wrapper-Based Feature Selection")
-    
-    # Choose wrapper method
-    method = st.selectbox("Select Wrapper-Based Technique", ["RFE", "Forward Selection"])
-    
-    # Select target column and numeric features
-    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-    selected_features = [col for col in numeric_columns if col != target_column]
-    target = data[target_column]
-    
-    if method == "RFE":
-        model = RandomForestClassifier()
-        selector = RFE(estimator=model, n_features_to_select=5, step=1)
-        selector.fit(data[selected_features], target)
-        st.write("Selected Features:")
-        st.write([feature for feature, selected in zip(selected_features, selector.support_) if selected])
-    elif method == "Forward Selection":
-        st.write("Forward Selection is under development")
-
-
-# Feature extraction methods
-def feature_extraction_methods(data, target_column):
-    st.header("Feature Extraction")
-    
-    # Choose extraction method
-    method = st.selectbox("Select Feature Extraction Technique", ["PCA", "LDA"])
-    
-    # Select target column and numeric features
-    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-    selected_features = [col for col in numeric_columns if col != target_column]
-    target = data[target_column]
-    
-    if method == "PCA":
-        n_components = st.slider("Number of Components", 1, len(selected_features))
-        pca = PCA(n_components=n_components)
-        principal_components = pca.fit_transform(data[selected_features])
-        st.write("Explained Variance Ratio:")
-        st.write(pca.explained_variance_ratio_)
-    elif method == "LDA":
-        lda = LDA(n_components=1)
-        lda_transformed = lda.fit_transform(data[selected_features], target)
-        st.write("LDA Transformed Data:")
-        st.write(pd.DataFrame(lda_transformed, columns=["LDA1"]))
