@@ -367,65 +367,46 @@ def outlier_detection(data):
         st.warning("No numerical columns in the dataset for outlier detection.")
 
 
-def display_heatmap(data):
-    st.header("Heatmap")
-    
-    # Select numerical columns
-    numerical_columns = list(data.select_dtypes(include=['number']).columns)
-    
-    # Check if there are numerical columns
-    if len(numerical_columns) > 1:
-        # Sidebar for customization options
-        with st.sidebar:
-            st.subheader("Heatmap Customization")
-            correlation_method = st.selectbox(
-                "Correlation Method",
-                ["pearson", "kendall", "spearman"],
-                index=0
-            )
-            annot = st.checkbox("Show Annotations", value=True)
-            fmt = st.selectbox("Annotation Format", ["0.2f", "0.1f", "d"], index=0)
-            cmap = st.selectbox(
-                "Color Palette",
-                ["coolwarm", "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "vlag"],
-                index=0
-            )
-            linewidths = st.slider("Line Widths Between Cells", min_value=0.0, max_value=2.0, value=0.5)
-            cbar = st.checkbox("Show Color Bar", value=True)
-        
-        # Calculate correlation matrix
-        corr_matrix = data[numerical_columns].corr(method=correlation_method)
-        
-        # Create heatmap
-        try:
-            fig, ax = plt.subplots(figsize=(10, 8))
-            sns.heatmap(
-                corr_matrix,
-                annot=annot,
-                fmt=fmt,
-                cmap=cmap,
-                linewidths=linewidths,
-                cbar=cbar,
-                ax=ax
-            )
-            ax.set_title(f"Heatmap ({correlation_method.capitalize()} Correlation)")
-            st.pyplot(fig)
-            
-            # Add download button for the plot
-            buffer = io.BytesIO()
-            fig.savefig(buffer, format='png')
-            buffer.seek(0)
-            st.download_button(
-                label="Download Heatmap as PNG",
-                data=buffer,
-                file_name="heatmap.png",
-                mime="image/png"
-            )
-        except Exception as e:
-            st.error(f"Error creating heatmap: {e}")
-    else:
-        st.warning("Not enough numerical columns in the dataset to create a heatmap.")
+def display_heatmap(data, correlation_method="pearson"):
+    """
+    Display a heatmap based on the correlation of numerical columns.
 
+    Parameters:
+        data (DataFrame): The input data.
+        correlation_method (str): The correlation method to use ('pearson', 'spearman', or 'kendall').
+    """
+    st.header("Heatmap")
+
+    # Select numerical columns
+    numerical_columns = data.select_dtypes(include=['number'])
+    
+    if numerical_columns.empty:
+        st.warning("No numerical columns found to create a heatmap.")
+        return
+
+    # Calculate correlation
+    try:
+        correlation_matrix = numerical_columns.corr(method=correlation_method)
+    except ValueError as e:
+        st.error(f"Error calculating correlation: {e}")
+        return
+
+    # Create heatmap
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+    ax.set_title(f"Heatmap ({correlation_method.capitalize()} Correlation)")
+    st.pyplot(fig)
+
+    # Download button for heatmap
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png")
+    buffer.seek(0)
+    st.download_button(
+        label="Download Heatmap as PNG",
+        data=buffer,
+        file_name=f"heatmap_{correlation_method}.png",
+        mime="image/png",
+    )
 
 def display_barplot(data):
     st.header("Bar Plot")
