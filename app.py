@@ -35,12 +35,15 @@ elif uploaded_file is not None:
             eda.display_scatterplot(data)
         elif visualization_type == "Histogram":
             eda.display_histogram(data)
-        elif visualization_type == "outlier_detection":
+        elif visualization_type == "Outlier Detection":
             # Outlier detection customization options
             st.subheader("Outlier Detection Techniques")
-            outlier_technique = st.selectbox( "Select Outlier Detection Technique", ["Box Plot", "Z-Score", "IQR Method", "Isolation Forest"], index=0,)
+            outlier_technique = st.selectbox(
+                "Select Outlier Detection Technique",
+                ["Outlier Detection: Box Plot", "Outlier Detection: Z-Score", "Outlier Detection: IQR Method", "Outlier Detection: Isolation Forest"],
+                index=0,
+            )
             eda.outlier_detection(data, outlier_technique)  # Pass selected technique to the function
-
         elif visualization_type == "Heatmap":
             st.subheader("Heatmap Settings")
             correlation_method = st.selectbox("Select Correlation Method", ["pearson", "spearman", "kendall"], index=0,)
