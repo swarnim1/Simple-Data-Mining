@@ -1,5 +1,5 @@
 import streamlit as st
-from components import eda, feature_engineering
+from components import eda, preprocessing
 import pandas as pd
 import numpy as np
 
