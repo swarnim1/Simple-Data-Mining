@@ -84,5 +84,5 @@ elif uploaded_file is not None:
             n_components = st.slider("Number of Principal Components", min_value=1, max_value=min(len(data.columns), len(data)), value=2)
             preprocessing.feature_extraction_pca(data, n_components)
 
-    else:
-        st.text("Select a feature engineering technique")
+        else:
+            st.text("Select a feature engineering technique")
