@@ -129,12 +129,6 @@ def display_pairplot(data):
     else:
         st.warning("Not enough numerical columns in the dataset to create a pairplot.")
     
-       
-
-
-
-
-
 
 def display_scatterplot_old(data):
     st.header("Scatter Plot")
