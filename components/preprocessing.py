@@ -26,6 +26,11 @@ def filter_based_methods(data, target_column, threshold):
     selected_features = [col for col in numeric_data.columns if col != target_column]
     target = data[target_column]
     
+    # Handle missing values using SimpleImputer (e.g., mean imputation)
+    imputer = SimpleImputer(strategy="mean")  # You can change the strategy if needed
+    numeric_data_imputed = pd.DataFrame(imputer.fit_transform(numeric_data), columns=numeric_data.columns)
+    target_imputed = imputer.fit_transform(target.values.reshape(-1, 1)).flatten()  # Impute target column
+
     # Select filter technique with a unique key
     technique = st.selectbox(
         "Select Filter-Based Technique",
@@ -35,7 +40,7 @@ def filter_based_methods(data, target_column, threshold):
     
     if technique == "Correlation":
         # Compute the correlation matrix
-        correlation_matrix = numeric_data.corr()
+        correlation_matrix = numeric_data_imputed.corr()
         
         # Filter the correlation matrix based on the threshold
         high_correlation = correlation_matrix[correlation_matrix > threshold]
@@ -46,7 +51,7 @@ def filter_based_methods(data, target_column, threshold):
     elif technique == "Chi-Square":
         # Select K best features using the Chi-Square method
         selector = SelectKBest(score_func=chi2, k="all")
-        selector.fit(data[selected_features], target)
+        selector.fit(numeric_data_imputed[selected_features], target_imputed)
         
         st.write("Chi-Square Scores:")
         st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
@@ -54,18 +59,18 @@ def filter_based_methods(data, target_column, threshold):
     elif technique == "ANOVA":
         # Select K best features using ANOVA F-test
         selector = SelectKBest(score_func=f_classif, k="all")
-        selector.fit(data[selected_features], target)
+        selector.fit(numeric_data_imputed[selected_features], target_imputed)
         
         st.write("ANOVA F-Scores:")
         st.write(pd.DataFrame({"Feature": selected_features, "Score": selector.scores_}))
 
     elif technique == "Mutual Information":
         # Select features using Mutual Information
-        scores = mutual_info_classif(data[selected_features], target)
+        scores = mutual_info_classif(numeric_data_imputed[selected_features], target_imputed)
         
         st.write("Mutual Information Scores:")
         st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
-
+        
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 import streamlit as st
