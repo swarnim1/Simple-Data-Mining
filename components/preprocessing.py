@@ -60,21 +60,33 @@ def filter_based_methods(data, target_column, threshold):
         st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
 
 
-# Wrapper-based feature selection
+from sklearn.feature_selection import RFE
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+import streamlit as st
+
 def wrapper_based_methods(data, target_column, num_features):
-    st.header("Wrapper-Based Feature Selection")
-    
-    # Select numeric features and target column
-    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-    selected_features = [col for col in numeric_columns if col != target_column]
-    target = data[target_column]
-    
-    model = RandomForestClassifier()
-    selector = RFE(estimator=model, n_features_to_select=num_features, step=1)
-    selector.fit(data[selected_features], target)
-    
-    st.write("Selected Features:")
-    st.write([feature for feature, selected in zip(selected_features, selector.support_) if selected])
+    # Ensure numeric features
+    numeric_data = data.select_dtypes(include=["number"])
+    selected_features = [col for col in numeric_data.columns if col != target_column]
+    target = numeric_data[target_column]
+
+    # Determine if target is continuous or categorical
+    if target.nunique() > 20 and target.dtype in ["float64", "int64"]:
+        # Continuous target: Use a regressor
+        estimator = RandomForestRegressor()
+        st.info("Using RandomForestRegressor for feature selection since the target is continuous.")
+    else:
+        # Categorical target: Use a classifier
+        estimator = RandomForestClassifier()
+        st.info("Using RandomForestClassifier for feature selection since the target is categorical.")
+
+    # Perform Recursive Feature Elimination (RFE)
+    selector = RFE(estimator, n_features_to_select=num_features)
+    selector.fit(numeric_data[selected_features], target)
+
+    # Display selected features
+    selected_columns = [selected_features[i] for i in range(len(selected_features)) if selector.support_[i]]
+    st.write("Selected Features:", selected_columns)
 
 
 def feature_extraction_methods(data, n_components):
