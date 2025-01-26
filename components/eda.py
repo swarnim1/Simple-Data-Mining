@@ -267,8 +267,8 @@ def display_histogram(data):
 
 
 
-def display_boxplot(data):
-    st.header("Box Plot")
+def outlier_detection(data, detection_method):
+    st.header("Outlier Detection")
     
     # Select numerical columns
     numerical_columns = list(data.select_dtypes(include=['number']).columns)
@@ -277,116 +277,129 @@ def display_boxplot(data):
     # Check if there are numerical columns
     if numerical_columns:
         # Dropdown for selecting the column
-        selected_column = st.selectbox("Select numerical column for box plot", numerical_columns)
+        selected_column = st.selectbox("Select numerical column for outlier detection", numerical_columns)
         
-        # Additional customization options
-        with st.sidebar:
-            st.subheader("Box Plot Customization")
-            group_by = st.selectbox("Group by (categorical column)", [None] + categorical_columns)
-            color = st.color_picker("Pick a Box Color", "#3498db")
-            show_points = st.checkbox("Show Individual Points (Swarmplot Overlay)", value=False)
-            point_alpha = st.slider("Point Transparency (Alpha)", min_value=0.1, max_value=1.0, value=0.7) if show_points else None
-        
-        # Create box plot
-        try:
-            fig, ax = plt.subplots()
-            sns.boxplot(
-                data=data,
-                x=group_by if group_by else None,
-                y=selected_column,
-                color=color,
-                ax=ax
-            )
-            
-            if show_points:
-                sns.swarmplot(
+        if detection_method == "Outlier Detection: Box Plot":
+            # Additional customization options
+            with st.sidebar:
+                st.subheader("Box Plot Customization")
+                group_by = st.selectbox("Group by (categorical column)", [None] + categorical_columns)
+                color = st.color_picker("Pick a Box Color", "#3498db")
+                show_points = st.checkbox("Show Individual Points (Swarmplot Overlay)", value=False)
+                point_alpha = st.slider("Point Transparency (Alpha)", min_value=0.1, max_value=1.0, value=0.7) if show_points else None
+
+            # Create box plot
+            try:
+                fig, ax = plt.subplots()
+                sns.boxplot(
                     data=data,
                     x=group_by if group_by else None,
                     y=selected_column,
-                    color="black",
-                    alpha=point_alpha,
+                    color=color,
                     ax=ax
                 )
+                
+                if show_points:
+                    sns.swarmplot(
+                        data=data,
+                        x=group_by if group_by else None,
+                        y=selected_column,
+                        color="black",
+                        alpha=point_alpha,
+                        ax=ax
+                    )
+                
+                ax.set_title(f"Outlier Detection: Box Plot - {selected_column}" + (f" by {group_by}" if group_by else ""))
+                st.pyplot(fig)
+                
+                # Add download button for the plot
+                buffer = io.BytesIO()
+                fig.savefig(buffer, format='png')
+                buffer.seek(0)
+                st.download_button(
+                    label="Download Box Plot as PNG",
+                    data=buffer,
+                    file_name=f"outlier_detection_boxplot_{selected_column}.png",
+                    mime="image/png"
+                )
+            except Exception as e:
+                st.error(f"Error creating box plot: {e}")
+        
+        elif detection_method == "Outlier Detection: Z-Score":
+            st.subheader("Z-Score Outlier Detection")
+            threshold = st.slider("Select Z-Score Threshold", min_value=1.0, max_value=5.0, value=3.0)
+            z_scores = (data[selected_column] - data[selected_column].mean()) / data[selected_column].std()
+            outliers = data[abs(z_scores) > threshold]
             
-            ax.set_title(f"Box Plot: {selected_column}" + (f" by {group_by}" if group_by else ""))
-            st.pyplot(fig)
+            st.write(f"Number of outliers detected: {len(outliers)}")
+            st.dataframe(outliers)
+        
+        elif detection_method == "Outlier Detection: IQR Method":
+            st.subheader("IQR Method Outlier Detection")
+            q1 = data[selected_column].quantile(0.25)
+            q3 = data[selected_column].quantile(0.75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            outliers = data[(data[selected_column] < lower_bound) | (data[selected_column] > upper_bound)]
             
-            # Add download button for the plot
-            buffer = io.BytesIO()
-            fig.savefig(buffer, format='png')
-            buffer.seek(0)
-            st.download_button(
-                label="Download Box Plot as PNG",
-                data=buffer,
-                file_name=f"boxplot_{selected_column}.png",
-                mime="image/png"
-            )
-        except Exception as e:
-            st.error(f"Error creating box plot: {e}")
+            st.write(f"Number of outliers detected: {len(outliers)}")
+            st.dataframe(outliers)
+        
+        elif detection_method == "Outlier Detection: Isolation Forest":
+            st.subheader("Isolation Forest Outlier Detection")
+            
+            contamination = st.slider("Contamination (Proportion of Outliers)", min_value=0.01, max_value=0.5, value=0.1)
+            model = IsolationForest(contamination=contamination, random_state=42)
+            data['anomaly'] = model.fit_predict(data[[selected_column]])
+            outliers = data[data['anomaly'] == -1]
+            
+            st.write(f"Number of outliers detected: {len(outliers)}")
+            st.dataframe(outliers)
     else:
-        st.warning("No numerical columns in the dataset to create a box plot.")
+        st.warning("No numerical columns in the dataset for outlier detection.")
 
 
+def display_heatmap(data, correlation_method="pearson"):
+    """
+    Display a heatmap based on the correlation of numerical columns.
 
-def display_heatmap(data):
+    Parameters:
+        data (DataFrame): The input data.
+        correlation_method (str): The correlation method to use ('pearson', 'spearman', or 'kendall').
+    """
     st.header("Heatmap")
-    
-    # Select numerical columns
-    numerical_columns = list(data.select_dtypes(include=['number']).columns)
-    
-    # Check if there are numerical columns
-    if len(numerical_columns) > 1:
-        # Sidebar for customization options
-        with st.sidebar:
-            st.subheader("Heatmap Customization")
-            correlation_method = st.selectbox(
-                "Correlation Method",
-                ["pearson", "kendall", "spearman"],
-                index=0
-            )
-            annot = st.checkbox("Show Annotations", value=True)
-            fmt = st.selectbox("Annotation Format", ["0.2f", "0.1f", "d"], index=0)
-            cmap = st.selectbox(
-                "Color Palette",
-                ["coolwarm", "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "vlag"],
-                index=0
-            )
-            linewidths = st.slider("Line Widths Between Cells", min_value=0.0, max_value=2.0, value=0.5)
-            cbar = st.checkbox("Show Color Bar", value=True)
-        
-        # Calculate correlation matrix
-        corr_matrix = data[numerical_columns].corr(method=correlation_method)
-        
-        # Create heatmap
-        try:
-            fig, ax = plt.subplots(figsize=(10, 8))
-            sns.heatmap(
-                corr_matrix,
-                annot=annot,
-                fmt=fmt,
-                cmap=cmap,
-                linewidths=linewidths,
-                cbar=cbar,
-                ax=ax
-            )
-            ax.set_title(f"Heatmap ({correlation_method.capitalize()} Correlation)")
-            st.pyplot(fig)
-            
-            # Add download button for the plot
-            buffer = io.BytesIO()
-            fig.savefig(buffer, format='png')
-            buffer.seek(0)
-            st.download_button(
-                label="Download Heatmap as PNG",
-                data=buffer,
-                file_name="heatmap.png",
-                mime="image/png"
-            )
-        except Exception as e:
-            st.error(f"Error creating heatmap: {e}")
-    else:
-        st.warning("Not enough numerical columns in the dataset to create a heatmap.")
 
+    # Select numerical columns
+    numerical_columns = data.select_dtypes(include=['number'])
+    
+    if numerical_columns.empty:
+        st.warning("No numerical columns found to create a heatmap.")
+        return
+
+    # Calculate correlation
+    try:
+        correlation_matrix = numerical_columns.corr(method=correlation_method)
+    except ValueError as e:
+        st.error(f"Error calculating correlation: {e}")
+        return
+
+    # Create heatmap
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+    ax.set_title(f"Heatmap ({correlation_method.capitalize()} Correlation)")
+    st.pyplot(fig)
+
+    # Download button for heatmap
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png")
+    buffer.seek(0)
+    st.download_button(
+        label="Download Heatmap as PNG",
+        data=buffer,
+        file_name=f"heatmap_{correlation_method}.png",
+        mime="image/png",
+    )
 
 def display_barplot(data):
     st.header("Bar Plot")
@@ -676,4 +689,3 @@ def display_timeseries_plot(data):
         )
     except Exception as e:
         st.error(f"Error creating time-series plot: {e}")
-
