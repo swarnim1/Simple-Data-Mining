@@ -16,8 +16,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import VarianceThreshold
 from scipy.stats import f_oneway
 
+from sklearn.feature_selection import mutual_info_classif
 
-# Filter-based feature selection
 def filter_based_methods(data, target_column, threshold):
     st.header("Filter-Based Feature Selection")
     
@@ -26,11 +26,28 @@ def filter_based_methods(data, target_column, threshold):
     selected_features = [col for col in numeric_data.columns if col != target_column]
     target = data[target_column]
     
+    # Check if target column is empty or full of NaNs
+    if target.isnull().all():
+        st.error("Target column is empty or contains all NaN values.")
+        return
+    
     # Handle missing values using SimpleImputer (e.g., mean imputation)
     imputer = SimpleImputer(strategy="mean")  # You can change the strategy if needed
     numeric_data_imputed = pd.DataFrame(imputer.fit_transform(numeric_data), columns=numeric_data.columns)
+    
+    # Impute target column (if needed)
     target_imputed = imputer.fit_transform(target.values.reshape(-1, 1)).flatten()  # Impute target column
-
+    
+    # Check if the target column is still empty after imputation
+    if target_imputed.size == 0:
+        st.error("Target column has no valid data after imputation.")
+        return
+    
+    # Check if selected features are empty
+    if not selected_features:
+        st.error("No valid features selected for filtering.")
+        return
+    
     # Select filter technique with a unique key
     technique = st.selectbox(
         "Select Filter-Based Technique",
