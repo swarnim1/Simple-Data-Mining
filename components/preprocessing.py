@@ -76,25 +76,42 @@ def wrapper_based_methods(data, target_column, num_features):
     st.write([feature for feature, selected in zip(selected_features, selector.support_) if selected])
 
 
-# Feature extraction methods
 def feature_extraction_methods(data, n_components):
-    st.header("Feature Extraction")
-    
-    # Select numeric columns
-    numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-    selected_features = numeric_columns
-    
-    method = st.selectbox("Select Feature Extraction Technique", ["PCA", "LDA"])
-    
-    if method == "PCA":
-        pca = PCA(n_components=n_components)
-        principal_components = pca.fit_transform(data[selected_features])
-        st.write("Explained Variance Ratio:")
-        st.write(pca.explained_variance_ratio_)
+    # Drop columns with non-numeric data
+    numeric_data = data.select_dtypes(include=["number"])
 
-    elif method == "LDA":
-        target_column = st.selectbox("Select Target Column for LDA", data.select_dtypes(include=["number"]).columns)
-        lda = LDA(n_components=1)
-        lda_transformed = lda.fit_transform(data[selected_features], data[target_column])
-        st.write("LDA Transformed Data:")
-        st.write(pd.DataFrame(lda_transformed, columns=["LDA1"]))
+    # Handling missing values by imputation (mean imputation)
+    imputer = SimpleImputer(strategy='mean')
+    numeric_data_imputed = pd.DataFrame(imputer.fit_transform(numeric_data), columns=numeric_data.columns)
+
+    # PCA - Principal Component Analysis
+    st.subheader("PCA - Principal Component Analysis")
+    try:
+        pca = PCA(n_components=n_components)
+        principal_components = pca.fit_transform(numeric_data_imputed)
+        pca_df = pd.DataFrame(principal_components, columns=[f"Principal Component {i+1}" for i in range(n_components)])
+        st.write("PCA Results:", pca_df)
+    except ValueError as e:
+        st.error(f"Error with PCA: {e}")
+        return
+
+    # LDA - Linear Discriminant Analysis
+    st.subheader("LDA - Linear Discriminant Analysis")
+    target_column = st.selectbox("Select Target Column for LDA", data.select_dtypes(include=["object"]).columns, key="lda_target")
+
+    if target_column:
+        # Handling missing values in the target column
+        target_column_imputed = data[target_column].fillna(data[target_column].mode()[0])  # Fill NaNs with mode
+        target_column_encoded = pd.factorize(target_column_imputed)[0]  # Encoding categorical labels
+        
+        # Apply LDA only if the number of classes in the target column is greater than 1
+        if len(np.unique(target_column_encoded)) > 1:
+            try:
+                lda = LDA(n_components=n_components)
+                lda_transformed = lda.fit_transform(numeric_data_imputed, target_column_encoded)
+                lda_df = pd.DataFrame(lda_transformed, columns=[f"LD Component {i+1}" for i in range(n_components)])
+                st.write("LDA Results:", lda_df)
+            except ValueError as e:
+                st.error(f"Error with LDA: {e}")
+        else:
+            st.warning("LDA requires at least two distinct classes in the target variable.")
