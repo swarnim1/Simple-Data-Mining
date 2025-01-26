@@ -20,10 +20,10 @@ if uploaded_file is None:
 else:
     # Read the CSV file
     data = pd.read_csv(uploaded_file)
-    
+
     with st.expander(f"Basic EDA of {uploaded_file.name}"):
         eda.display_basic_info(data)
-        
+
     with st.expander("Visualizations"):
         visualization_type = st.selectbox(
             "Select Visualization Type",
@@ -48,7 +48,7 @@ else:
                 eda.display_violinplot(data)
             elif visualization_type == "Time-Series Plot":
                 eda.display_timeseries_plot(data)
-    
+
     with st.expander("Outlier Detection"):
         st.subheader("Outlier Detection Techniques")
         detection_method = st.selectbox(
@@ -62,7 +62,7 @@ else:
             index=0
         )
         eda.outlier_detection(data, detection_method)
-    
+
     with st.expander("Feature Engineering"):
         st.subheader("Feature Engineering Techniques")
         feature_eng_method = st.selectbox(
@@ -75,7 +75,7 @@ else:
             ],
             index=0
         )
-        
+
         if feature_eng_method == "Filter-Based Techniques: Correlation":
             st.subheader("Filter-Based Techniques: Correlation")
             threshold = st.slider(
@@ -86,9 +86,8 @@ else:
                 step=0.01
             )
             target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
-            # Pass target_column along with data and threshold
             preprocessing.filter_based_methods(data, target_column, threshold)
-        
+
         elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
             st.subheader("Wrapper-Based Techniques: Recursive Feature Elimination")
             target_column = st.selectbox(
@@ -101,9 +100,8 @@ else:
                 max_value=len(data.columns) - 1,
                 value=5
             )
-            # Pass target_column and num_features along with data
             preprocessing.wrapper_based_methods(data, target_column, num_features)
-        
+
         elif feature_eng_method == "Feature Extraction: PCA":
             st.subheader("Feature Extraction: PCA")
             n_components = st.slider(
@@ -112,19 +110,23 @@ else:
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
+            # Ensure the updated feature_extraction_methods handles missing values for PCA
             preprocessing.feature_extraction_methods(data, n_components)
-        
+
         elif feature_eng_method == "Feature Extraction: LDA":
             st.subheader("Feature Extraction: LDA")
-            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
+            target_column = st.selectbox(
+                "Select Target Column",
+                data.select_dtypes(include=["object", "category"]).columns
+            )
             n_components = st.slider(
                 "Number of Components",
                 min_value=1,
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
-            # Pass target_column and n_components along with data for LDA
-            preprocessing.feature_extraction_methods_lda(data, target_column, n_components)
-        
+            # Pass the target_column and n_components to LDA
+            preprocessing.feature_extraction_methods(data, n_components)
+
         else:
             st.text("Select a feature engineering technique")
