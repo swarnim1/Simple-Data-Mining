@@ -13,6 +13,9 @@ from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import VarianceThreshold
+from scipy.stats import f_oneway
+
 
 # Filter-based feature selection
 def filter_based_methods(data, target_column, threshold):
