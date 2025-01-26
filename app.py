@@ -65,31 +65,38 @@ else:
 
     with st.expander("Feature Engineering"):
         st.subheader("Feature Engineering Techniques")
+
+        # Categorized techniques
         feature_eng_method = st.selectbox(
             "Select Feature Engineering Technique",
             [
-                "Filter-Based Techniques: Correlation",
-                "Wrapper-Based Techniques: Recursive Feature Elimination",
+                "Filter-Based Techniques",
+                "Wrapper-Based Techniques",
                 "Feature Extraction: PCA",
                 "Feature Extraction: LDA"
             ],
             index=0
         )
 
-        if feature_eng_method == "Filter-Based Techniques: Correlation":
-            st.subheader("Filter-Based Techniques: Correlation")
+        if feature_eng_method == "Filter-Based Techniques":
+            st.subheader("Filter-Based Techniques")
+            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
             threshold = st.slider(
-                "Set Correlation Threshold",
+                "Set Threshold (for Correlation)",
                 min_value=0.0,
                 max_value=1.0,
                 value=0.5,
                 step=0.01
             )
-            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
+            filter_technique = st.selectbox(
+                "Select Filter-Based Technique",
+                ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
+                index=0
+            )
             preprocessing.filter_based_methods(data, target_column, threshold)
 
-        elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
-            st.subheader("Wrapper-Based Techniques: Recursive Feature Elimination")
+        elif feature_eng_method == "Wrapper-Based Techniques":
+            st.subheader("Wrapper-Based Techniques")
             target_column = st.selectbox(
                 "Select Target Column",
                 data.select_dtypes(include=["number"]).columns
@@ -100,9 +107,7 @@ else:
                 max_value=len(data.columns) - 1,
                 value=5
             )
-            # Updated to dynamically handle continuous and categorical targets
             preprocessing.wrapper_based_methods(data, target_column, num_features)
-
 
         elif feature_eng_method == "Feature Extraction: PCA":
             st.subheader("Feature Extraction: PCA")
@@ -112,7 +117,6 @@ else:
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
-            # Ensure the updated feature_extraction_methods handles missing values for PCA
             preprocessing.feature_extraction_methods(data, n_components)
 
         elif feature_eng_method == "Feature Extraction: LDA":
@@ -127,7 +131,6 @@ else:
                 max_value=min(len(data.columns), len(data)),
                 value=2
             )
-            # Pass the target_column and n_components to LDA
             preprocessing.feature_extraction_methods(data, n_components)
 
         else:
