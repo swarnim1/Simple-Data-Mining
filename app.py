@@ -69,14 +69,14 @@ else:
 
         # Categorized techniques
         feature_eng_method = st.selectbox(
-            "Select Feature Engineering Technique",[
-            "Filter-Based Techniques",
-            "Wrapper-Based Techniques",
-            "Feature Extraction: PCA",
-            "Feature Extraction: LDA"
+            "Select Feature Engineering Technique", [
+                "Filter-Based Techniques",
+                "Wrapper-Based Techniques",
+                "Feature Extraction: PCA",
+                "Feature Extraction: LDA"
             ],
             index=0
-            )
+        )
 
         if feature_eng_method == "Filter-Based Techniques":
             st.subheader("Filter-Based Techniques")
@@ -133,41 +133,32 @@ else:
 
     with st.expander("Model Training"):
         st.subheader("Model Training")
+        
+        # Hyperparameter tuning section
+        model_name = st.selectbox("Select Model", ["RandomForest", "SVM", "LogisticRegression", "XGBoost"])
+        
+        # Hyperparameters for the models
+        if model_name == "RandomForest":
+            n_estimators = st.slider("Number of Estimators", min_value=50, max_value=500, value=100, step=50)
+            max_depth = st.slider("Max Depth", min_value=1, max_value=20, value=10)
+            hyperparameters = {"n_estimators": n_estimators, "max_depth": max_depth}
+        elif model_name == "SVM":
+            kernel = st.selectbox("Kernel", ["linear", "poly", "rbf"])
+            C = st.slider("C", min_value=0.1, max_value=10.0, value=1.0)
+            hyperparameters = {"kernel": kernel, "C": C}
+        elif model_name == "LogisticRegression":
+            C = st.slider("C", min_value=0.01, max_value=10.0, value=1.0)
+            max_iter = st.slider("Max Iterations", min_value=50, max_value=500, value=100)
+            hyperparameters = {"C": C, "max_iter": max_iter}
+        elif model_name == "XGBoost":
+            n_estimators = st.slider("Number of Estimators", min_value=50, max_value=500, value=100, step=50)
+            learning_rate = st.slider("Learning Rate", min_value=0.01, max_value=1.0, value=0.1)
+            max_depth = st.slider("Max Depth", min_value=1, max_value=20, value=6)
+            hyperparameters = {"n_estimators": n_estimators, "learning_rate": learning_rate, "max_depth": max_depth}
 
-        # Select model type for training
-        model_name = st.selectbox(
-            "Select Model Type",
-            ["Random Forest Regressor", "Random Forest Classifier", "Logistic Regression", "Linear Regression"]
-        )
+        # Display hyperparameters before training
+        st.write(f"Hyperparameters for {model_name}: {hyperparameters}")
 
-        # Choose tuning method
-        tuning_method = st.selectbox(
-            "Select Hyperparameter Tuning Method",
-            ["None", "Grid Search", "Random Search"]
-        )
-
-        # Select target and features
-        target_column = st.selectbox("Select Target Column", data.columns)
-        features = data.columns[data.columns != target_column]
-
-        # Split the data
-        X_train = data[features]
-        y_train = data[target_column]
-
-        # Hyperparameter tuning (if applicable)
-        if tuning_method != "None":
-            param_grid = modeling.configure_hyperparameters(model_name, tuning_method)
-            best_model = modeling.run_hyperparameter_search(
-                model_name, param_grid, X_train, y_train, tuning_method, cv=5
-            )
-            st.write("Best Model after Hyperparameter Tuning:", best_model)
-        else:
-            # No tuning, just fit the model with default parameters
-            model = modeling.get_model(model_name)
-            model.fit(X_train, y_train)
-            st.write("Model trained successfully:", model)
-
-        # Add button to trigger training process
+        # Train the model
         if st.button("Train Model"):
-            # Step 1: Call the train_model function
-            model = modeling.train_model(data)
+            modeling.train_model(data, model_name, hyperparameters)
