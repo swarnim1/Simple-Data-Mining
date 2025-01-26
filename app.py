@@ -64,79 +64,36 @@ else:
         eda.outlier_detection(data, detection_method)
 
     with st.expander("Feature Engineering"):
-    st.subheader("Feature Engineering Techniques")
+        st.subheader("Feature Engineering Techniques")
 
-    # Categorized techniques
-    feature_eng_method = st.selectbox(
-        "Select Feature Engineering Technique",
-        [
+        # Categorized techniques
+        feature_eng_method = st.selectbox(
+            "Select Feature Engineering Technique",[
             "Filter-Based Techniques",
             "Wrapper-Based Techniques",
             "Feature Extraction: PCA",
             "Feature Extraction: LDA"
-        ],
-        index=0
-    )
-
-    if feature_eng_method == "Filter-Based Techniques":
-        st.subheader("Filter-Based Techniques")
-        target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
-        threshold = st.slider(
-            "Set Threshold (for Correlation)",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.5,
-            step=0.01
-        )
-        # Only keep this one dropdown for Filter-Based Technique
-        filter_technique = st.selectbox(
-            "Select Filter-Based Technique",
-            ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
+            ],
             index=0
-        )
-        preprocessing.filter_based_methods(data, target_column, threshold)
+            )
 
-    elif feature_eng_method == "Wrapper-Based Techniques":
-        st.subheader("Wrapper-Based Techniques")
-        target_column = st.selectbox(
-            "Select Target Column",
-            data.select_dtypes(include=["number"]).columns
-        )
-        num_features = st.slider(
-            "Number of Features to Select",
-            min_value=1,
-            max_value=len(data.columns) - 1,
-            value=5
-        )
-        preprocessing.wrapper_based_methods(data, target_column, num_features)
-
-    elif feature_eng_method == "Feature Extraction: PCA":
-        st.subheader("Feature Extraction: PCA")
-        n_components = st.slider(
-            "Number of Principal Components",
-            min_value=1,
-            max_value=min(len(data.columns), len(data)),
-            value=2
-        )
-        preprocessing.feature_extraction_methods(data, n_components)
-
-    elif feature_eng_method == "Feature Extraction: LDA":
-        st.subheader("Feature Extraction: LDA")
-        target_column = st.selectbox(
-            "Select Target Column",
-            data.select_dtypes(include=["object", "category"]).columns
-        )
-        n_components = st.slider(
-            "Number of Components",
-            min_value=1,
-            max_value=min(len(data.columns), len(data)),
-            value=2
-        )
-        preprocessing.feature_extraction_methods(data, n_components)
-
-    else:
-        st.text("Select a feature engineering technique")
-
+        if feature_eng_method == "Filter-Based Techniques":
+            st.subheader("Filter-Based Techniques")
+            target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
+            threshold = st.slider(
+                "Set Threshold (for Correlation)",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.01
+            )
+            # Only keep this one dropdown for Filter-Based Technique
+            filter_technique = st.selectbox(
+                "Select Filter-Based Technique",
+                ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
+                index=0
+                )
+            preprocessing.filter_based_methods(data, target_column, threshold)
 
         elif feature_eng_method == "Wrapper-Based Techniques":
             st.subheader("Wrapper-Based Techniques")
