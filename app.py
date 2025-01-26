@@ -88,11 +88,11 @@ else:
                 step=0.01
             )
             # Only keep this one dropdown for Filter-Based Technique
-            filter_technique = st.selectbox(
-                "Select Filter-Based Technique",
-                ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
-                index=0
-                )
+            # filter_technique = st.selectbox(
+            #   "Select Filter-Based Technique",
+            #    ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
+            #    index=0
+            #    )
             preprocessing.filter_based_methods(data, target_column, threshold)
 
         elif feature_eng_method == "Wrapper-Based Techniques":
