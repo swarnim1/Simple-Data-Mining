@@ -1,5 +1,7 @@
 import streamlit as st
-from components import eda, preprocessing
+
+from components import eda, preprocessing, modeling
+
 import pandas as pd
 
 # Set up the Streamlit app
@@ -29,6 +31,7 @@ else:
             "Select Visualization Type",
             [None, "Pairplot", "Scatter Plot", "Histogram", "Heatmap", "Bar Plot", "Line Plot", "Violin Plot", "Time-Series Plot"]
         )
+
         if visualization_type:
             if visualization_type == "Pairplot":
                 eda.display_pairplot(data)
