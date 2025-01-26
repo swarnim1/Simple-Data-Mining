@@ -1,7 +1,5 @@
 import streamlit as st
-
 from components import eda, preprocessing, modeling
-
 import pandas as pd
 
 # Set up the Streamlit app
@@ -90,12 +88,6 @@ else:
                 value=0.5,
                 step=0.01
             )
-            # Only keep this one dropdown for Filter-Based Technique
-            # filter_technique = st.selectbox(
-            #   "Select Filter-Based Technique",
-            #    ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
-            #    index=0
-            #    )
             preprocessing.filter_based_methods(data, target_column, threshold)
 
         elif feature_eng_method == "Wrapper-Based Techniques":
@@ -140,4 +132,37 @@ else:
             st.text("Select a feature engineering technique")
 
     with st.expander("Model Training"):
-        modeling.train_model(data)
+        st.subheader("Model Training")
+        
+        # Select model type for training
+        model_name = st.selectbox(
+            "Select Model Type",
+            ["Random Forest Regressor", "Random Forest Classifier", "Logistic Regression", "Linear Regression"]
+        )
+
+        # Choose tuning method
+        tuning_method = st.selectbox(
+            "Select Hyperparameter Tuning Method",
+            ["None", "Grid Search", "Random Search"]
+        )
+
+        # Select target and features
+        target_column = st.selectbox("Select Target Column", data.columns)
+        features = data.columns[data.columns != target_column]
+
+        # Split the data
+        X_train = data[features]
+        y_train = data[target_column]
+
+        # Hyperparameter tuning (if applicable)
+        if tuning_method != "None":
+            param_grid = modeling.configure_hyperparameters(model_name, tuning_method)
+            best_model = modeling.run_hyperparameter_search(
+                model_name, param_grid, X_train, y_train, tuning_method, cv=5
+            )
+            st.write("Best Model after Hyperparameter Tuning:", best_model)
+        else:
+            # No tuning, just fit the model with default parameters
+            model = modeling.get_model(model_name)
+            model.fit(X_train, y_train)
+            st.write("Model trained successfully:", model)
