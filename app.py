@@ -133,7 +133,7 @@ else:
 
     with st.expander("Model Training"):
         st.subheader("Model Training")
-        
+
         # Select model type for training
         model_name = st.selectbox(
             "Select Model Type",
@@ -166,3 +166,8 @@ else:
             model = modeling.get_model(model_name)
             model.fit(X_train, y_train)
             st.write("Model trained successfully:", model)
+
+        # Add button to trigger training process
+        if st.button("Train Model"):
+            # Step 1: Call the train_model function
+            model = modeling.train_model(data)
