@@ -88,7 +88,7 @@ else:
             target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
             preprocessing.filter_based_methods(data, target_column, threshold)
 
-      elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
+        elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
             st.subheader("Wrapper-Based Techniques: Recursive Feature Elimination")
             target_column = st.selectbox(
                 "Select Target Column",
