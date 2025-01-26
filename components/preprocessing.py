@@ -26,8 +26,12 @@ def filter_based_methods(data, target_column, threshold):
     selected_features = [col for col in numeric_data.columns if col != target_column]
     target = data[target_column]
     
-    # Select filter technique
-    technique = st.selectbox("Select Filter-Based Technique", ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"])
+    # Select filter technique with a unique key
+    technique = st.selectbox(
+        "Select Filter-Based Technique",
+        ["Correlation", "Chi-Square", "ANOVA", "Mutual Information"],
+        key="filter_technique"
+    )
     
     if technique == "Correlation":
         # Compute the correlation matrix
@@ -61,7 +65,6 @@ def filter_based_methods(data, target_column, threshold):
         
         st.write("Mutual Information Scores:")
         st.write(pd.DataFrame({"Feature": selected_features, "Score": scores}))
-
 
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
