@@ -138,3 +138,6 @@ else:
 
         else:
             st.text("Select a feature engineering technique")
+
+    with st.expander("Model Training"):
+        modeling.train_model(data)
