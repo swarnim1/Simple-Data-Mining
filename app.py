@@ -88,7 +88,7 @@ else:
             target_column = st.selectbox("Select Target Column", data.select_dtypes(include=["number"]).columns)
             preprocessing.filter_based_methods(data, target_column, threshold)
 
-        elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
+      elif feature_eng_method == "Wrapper-Based Techniques: Recursive Feature Elimination":
             st.subheader("Wrapper-Based Techniques: Recursive Feature Elimination")
             target_column = st.selectbox(
                 "Select Target Column",
@@ -100,7 +100,9 @@ else:
                 max_value=len(data.columns) - 1,
                 value=5
             )
+            # Updated to dynamically handle continuous and categorical targets
             preprocessing.wrapper_based_methods(data, target_column, num_features)
+
 
         elif feature_eng_method == "Feature Extraction: PCA":
             st.subheader("Feature Extraction: PCA")
