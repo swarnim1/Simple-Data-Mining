@@ -1,11 +1,17 @@
 import streamlit as st
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.metrics import mean_squared_error, accuracy_score
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, LogisticRegression , Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.metrics import mean_squared_error, accuracy_score ,mean_absolute_error , r2_score,precision_score,recall_score,f1_score
 from components import utils
+from components import evaluate_model
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from xgboost import XGBRegressor, XGBClassifier 
+
 
 
 def train_model(data):
@@ -21,14 +27,23 @@ def train_model(data):
         st.text("Target variable is continuous. Suggested models: Regression models")
         models = {
             "Linear Regression": LinearRegression(),
-            "Random Forest Regressor": RandomForestRegressor()
+            "Ridge Regression": Ridge(),
+            "Lasso Regression": Lasso(),
+            "Polynomial Regression": None,  # We'll handle it differently
+            "Random Forest Regressor": RandomForestRegressor(),
+            "Decision Tree Regressor": DecisionTreeRegressor(),
+            "XGBoost Regressor": XGBRegressor(),
+            "KNN Regressor": KNeighborsRegressor(),
         }
     else:
         is_continuous = False
         st.text("Target variable is categorical. Suggested models: Classification models")
         models = {
             "Logistic Regression": LogisticRegression(max_iter=1000),
-            "Random Forest Classifier": RandomForestClassifier()
+            "Random Forest Classifier": RandomForestClassifier(),
+            "Decision Tree Classifier": DecisionTreeClassifier(),
+            "XGBoost Classifier": XGBClassifier(use_label_encoder=False, eval_metric="logloss"),
+            "KNN Classifier": KNeighborsClassifier(),
         }
 
     # Step 2: Feature Selection
@@ -62,32 +77,39 @@ def train_model(data):
     model_name = st.selectbox("Select Model", list(models.keys()))
     model = models[model_name]
 
+    if model_name == "Polynomial Regression":
+        poly_degree = st.slider("Select Polynomial Degree", 2, 5, 2)
+        poly = PolynomialFeatures(degree=poly_degree)
+        X_train = poly.fit_transform(X_train)
+        X_test = poly.transform(X_test)
+        model = LinearRegression()  # Polynomial regression uses LinearRegression underneath
+
     # Step 5: Hyperparameter Tuning
-    tuning_method = st.radio("Select Tuning Method", ["None", "Grid Search", "Random Search"], index=0)
-    param_grid = {}
+    if(model_name != "Linear Regression" and model_name != "Polynomial Regression" ):
 
-    if tuning_method in ["Grid Search", "Random Search"]:
-        param_grid = utils.configure_hyperparameters(model_name, tuning_method)
-        cv = st.slider("Number of Cross-Validation Folds (cv)", 2, 10, 3)
+        tuning_method = st.radio("Select Tuning Method", ["None", "Grid Search", "Random Search"], index=0)
+        param_grid = {}
 
-        if tuning_method == "Random Search":
-            n_iter = st.number_input("Number of Iterations (n_iter) for Random Search", 1, 100, 10)
-            if st.button("Run Hyperparameter Search"):
-                model = utils.run_hyperparameter_search(model, param_grid, X_train, y_train, tuning_method , n_iter ,cv)
-        else:
-            if st.button("Run Hyperparameter Search"):
-                model = utils.run_hyperparameter_search(model, param_grid, X_train, y_train, tuning_method ,cv)
-        
+        if tuning_method in ["Grid Search", "Random Search"]:
+            param_grid = utils.configure_hyperparameters(model_name, tuning_method)
+            cv = st.slider("Number of Cross-Validation Folds (cv)", 2, 10, 3)
+
+            if tuning_method == "Random Search":
+                n_iter = st.number_input("Number of Iterations (n_iter) for Random Search", 1, 100, 10)
+                if st.button("Run Hyperparameter Search"):
+                    model = utils.run_hyperparameter_search(model, param_grid, X_train, y_train, tuning_method, n_iter, cv)
+            else:
+                if st.button("Run Hyperparameter Search"):
+                    model = utils.run_hyperparameter_search(model, param_grid, X_train, y_train, tuning_method, cv)
 
     # Step 6: Train and Test Button
     if st.button("Train and Test"):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
+        return model, X_test, y_test, y_pred, is_continuous
+    return None, None, None, None, None
 
-        st.subheader("Model Performance")
-        if is_continuous:
-            mse = mean_squared_error(y_test, y_pred)
-            st.text(f"Mean Squared Error: {mse}")
-        else:
-            accuracy = accuracy_score(y_test, y_pred)
-            st.text(f"Accuracy: {accuracy}")
+        
+
+
+
